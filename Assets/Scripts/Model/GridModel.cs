@@ -6,6 +6,8 @@ namespace Assets.Scripts.Model
 {
     public class GridModel : BasicGridModel
     {
+        public override bool IsPlaceholder => false;
+
         public GridModel(GridSettings gridSettings, int bombsCount, IntVector2 firstSquare) : base(gridSettings)
         {
             Grid = GenerateGrid(gridSettings.Horizontal, gridSettings.Vertical, bombsCount, firstSquare);
@@ -18,7 +20,7 @@ namespace Assets.Scripts.Model
 
             for (var i = 0; i < bombPositions.Count; i++)
             {
-                grid[bombPositions[i].X, bombPositions[i].Y] = new CellBomb();
+                grid[bombPositions[i].X, bombPositions[i].Y] = new CellBomb(bombPositions[i].X, bombPositions[i].Y);
             }
 
             for (var i = 0; i < horizontal; i++)
@@ -27,8 +29,7 @@ namespace Assets.Scripts.Model
                 {
                     if (grid[i, j] == null)
                     {
-                        var cell = new CellEmpty();
-                        grid[i, j] = cell;
+                        var cell = new CellEmpty(i, j);
                         cell.TouchingBombs = grid.GetNeighbors(i, j).Where(n => n != null && n is CellBomb).Count();
                     }
                 }

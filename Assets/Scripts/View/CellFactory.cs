@@ -8,15 +8,12 @@ namespace Assets.Scripts
     {
         public static ICellView GetCell(ICell cellModel, GameSettings gameSettings)
         {
-            switch (cellModel)
-            {
-                case CellEmpty:
-                    return Object.Instantiate(gameSettings.EmptyPrefab);
-                case CellBomb:
-                    return Object.Instantiate(gameSettings.BombPrefab);
-                default:
-                    throw new System.Exception($"No prefab for type: {cellModel.GetType()} found");
-            }
+            if (cellModel is CellEmpty _)
+                return Object.Instantiate(gameSettings.EmptyPrefab);
+            else if (cellModel is CellBomb _ )
+                return Object.Instantiate(gameSettings.BombPrefab);
+            else
+                throw new System.Exception($"No prefab for type: {cellModel.GetType()} found");
         }
     }
 }

@@ -3,6 +3,21 @@
     public class BasicGridModel
     {
         public ICell[,] Grid;
+        public virtual bool IsPlaceholder => true; //return if this is a placeholder grid
+        public int FlippedSlots
+        {
+            get
+            {
+                var count = 0;
+                foreach (var cell in Grid)
+                {
+                    if (cell.IsFlipped)
+                        count++;
+                }
+
+                return count;
+            }
+        }
 
         public BasicGridModel(GridSettings gridSettings)
         {
@@ -17,7 +32,7 @@
             {
                 for (var j = 0; j < vertical; j++)
                 {
-                    grid[i, j] = new CellEmpty();
+                    grid[i, j] = new CellEmpty(i, j);
                 }
             }
 
