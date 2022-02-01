@@ -1,35 +1,29 @@
 ﻿using Assets.Scripts.Model;
 using Assets.Scripts.View;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class MinesweeperUI : MonoBehaviour
-    {
-        internal void GameEnd(bool win) => throw new NotImplementedException();
-    }
-
     public class GridView : MonoBehaviour
     {
-        [SerializeField] private MinesweeperUI minesweeperUI;
-
         public event Action<ICell> OnMark;
         public event Action<ICell> OnFlip;
 
-        private List<ICellView> cellViews = new List<ICellView>();
+        private ICellView[,] cellViews;
 
         public void PopulateGrid(BasicGridModel gridModel, GameSettings gameSettings)
         {
             DestroyAndClear();
 
             var grid = gridModel.Grid;
-            float horizontalLength = grid.GetLength(0);
-            float verticalLength = grid.GetLength(1);
+            var horizontalLength = grid.GetLength(0);
+            var verticalLength = grid.GetLength(1);
 
-            Camera.main.orthographicSize = (horizontalLength + verticalLength) / 10;
-            transform.localPosition = new Vector3(horizontalLength * -0.15f, verticalLength * -0.15f, 10);
+            cellViews = new ICellView[horizontalLength, verticalLength];
+
+            Camera.main.orthographicSize = (float) (horizontalLength + verticalLength) / 10;
+            transform.localPosition = new Vector3((float) horizontalLength * -0.15f, (float) verticalLength * -0.15f, 10);
 
             for (var i = 0; i < horizontalLength; i++)
             {
@@ -38,17 +32,30 @@ namespace Assets.Scripts
                     var cell = CellFactory.GetCell(grid[i, j], gameSettings, this.transform);
                     cell.SetModel(grid[i, j]);
                     SetupListeners(cell);
-                    cellViews.Add(cell);
+                    cellViews[i, j] = cell;
                 }
             }
         }
 
+        public void SetMarked(ICell cell, bool isMarked)
+        {
+            cellViews[cell.X, cell.Y].MarkView(isMarked);
+        }
+
+        public void SetFlipped(ICell cell)
+        {
+            cellViews[cell.X, cell.Y].FlipView();
+        }
+
         public void DestroyAndClear()
         {
+            if (cellViews == null || cellViews.Length == 0)
+                return;
+
             foreach(var cellView in cellViews)
                 cellView.Destroy();
 
-            cellViews.Clear();
+            cellViews = null;
         }
 
         private void SetupListeners(ICellView cellView)
@@ -56,11 +63,6 @@ namespace Assets.Scripts
             //grid is encapsulating all cells events to simplify the Presenter listener
             cellView.OnMark.AddListener((cell) => OnMark?.Invoke(cell));
             cellView.OnFlip.AddListener((cell) => OnFlip?.Invoke(cell));
-        }
-
-        internal void GameEnd(bool win)
-        {
-            minesweeperUI.GameEnd(win);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Presenter;
 using Assets.Scripts.Services;
+using Assets.Scripts.View;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -10,14 +11,14 @@ namespace Assets.Scripts
     {
         [SerializeField] private GameSettings gameSettings;
         private InputService inputService;
-        private GridView view;
+        private IGameView view;
         private MinesweeperPresenter presenter;
 
         public void Start()
         {
             this.inputService = new InputService();
-            this.view = Instantiate(gameSettings.GridViewPrefab);
-            this.presenter = new MinesweeperPresenter(gameSettings, view, this);
+            this.view = Instantiate(gameSettings.GameViewPrefab);
+            this.presenter = new MinesweeperPresenter(gameSettings, view);
         }
 
         public void Update()

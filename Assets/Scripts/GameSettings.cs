@@ -19,8 +19,8 @@ namespace Assets.Scripts
         public int MaxBombs => maxBombs;
 
         [Header("Prefabs")]
-        [SerializeField] private GridView gridViewPrefab;
-        public GridView GridViewPrefab => gridViewPrefab;
+        [SerializeField] private GameView gameViewPrefab;
+        public GameView GameViewPrefab => gameViewPrefab;
 
         [SerializeField] private CellBombView bombPrefab;
         public CellBombView BombPrefab => bombPrefab;

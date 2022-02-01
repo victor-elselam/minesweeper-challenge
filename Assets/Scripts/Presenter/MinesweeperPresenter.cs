@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.Model;
-using System;
-using System.Collections;
+using Assets.Scripts.View;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.Presenter
@@ -11,29 +11,43 @@ namespace Assets.Scripts.Presenter
     {
         private BasicGridModel gridModel;
         private GameSettings gameSettings;
-        private GridView gridView;
-        private MonoBehaviour coroutineHost;
+        private WinConditionHandler winCondition;
+        private IGameView gameView;
+        
         private int bombsCount;
+        private bool isFlipping;
 
-        public MinesweeperPresenter(GameSettings gameSettings, GridView gridView, MonoBehaviour coroutineHost)
+        public MinesweeperPresenter(GameSettings gameSettings, IGameView gameView)
         {
             this.gameSettings = gameSettings;
-            this.gridView = gridView;
-            this.coroutineHost = coroutineHost;
+            this.gameView = gameView;
+            winCondition = new WinConditionHandler();
+
+            gameView.OnFlip += FlipCell;
+            gameView.OnMark += Mark;
+            SetupPlaceholderGame();
+        }
+
+        //this usage of this Task to restart game is not ideal. Probably we would need more layers to deal with the application loop
+        public async void GameEnd(bool win)
+        {
+            Debug.Log(win ? "Game Win" : "Game Lose");
+            gameView.GameEnd(win);
+            await Task.Delay(1 * 1000);
             SetupPlaceholderGame();
         }
 
         public void SetupPlaceholderGame()
         {
             var gridSettings = gameSettings.GridSettings;
-            gridModel = new BasicGridModel(gridSettings);
+            bombsCount = Random.Range(gameSettings.MinBombs, gameSettings.MaxBombs);
+            gridModel = new BasicGridModel(gridSettings, bombsCount);
             Setup(gridModel);
         }
 
         public void SetupGame(IntVector2 firstFlip)
         {
             var gridSettings = gameSettings.GridSettings;
-            bombsCount = UnityEngine.Random.Range(gameSettings.MinBombs, gameSettings.MaxBombs);
             gridModel = new GridModel(gridSettings, bombsCount, firstFlip);
             Setup(gridModel);
 
@@ -42,56 +56,47 @@ namespace Assets.Scripts.Presenter
 
         private void Setup(BasicGridModel gridModel)
         {
-            //unregister events to avoid leak
-            if (gridView != null)
-            {
-                gridView.OnMark -= MarkCell;
-                gridView.OnFlip -= FlipCell;
-            }
-
-            gridView.PopulateGrid(gridModel, gameSettings);
-            gridView.OnMark += MarkCell;
-            gridView.OnFlip += FlipCell;
+            gameView.PopulateGrid(gridModel, gameSettings);
         }
 
-        private void MarkCell(ICell cell)
-        {
-            cell.SetMarked(!cell.IsMarked);
-        }
-
-        private void FlipCell(ICell cell)
+        public async void FlipCell(ICell cell)
         {
             //return to don't allow flipping a marked cell
             if (cell.IsMarked)
                 return;
 
-            if (gridModel.IsPlaceholder && gridModel.FlippedSlots == 0)
+            //if this is the placeholder game, setup a valid one and return
+            if (gridModel.IsPlaceholder) 
             {
                 SetupGame(new IntVector2(cell.X, cell.Y));
                 return;
             }
 
-            if (cell is CellBomb)
+            if (winCondition.IsLose(cell))
             {
-                gridView.GameEnd(false);
+                GameEnd(false);
+                return;
             }
 
-            coroutineHost.StartCoroutine(OpenCells(cell, CheckForWin));
+            //I had to lock it, in some very specific situations, multiple async calls were made and gave a Win in the placeholder game
+            if (isFlipping)
+                return;
+
+            isFlipping = true;
+
+            Debug.Log("Openning cells!");
+            await OpenCells(cell);
+
+            isFlipping = false;
+
+            if (winCondition.IsWin(gridModel))
+                GameEnd(true);
         }
 
-        private void CheckForWin()
+        private async Task OpenCells(ICell cell)
         {
-            foreach(var cell in gridModel.Grid)
-            {
-                if (cell is CellEmpty && !cell.IsFlipped)
-                    return;
-            }
-            gridView.GameEnd(true);
-        }
+            Flip(cell);
 
-        private IEnumerator OpenCells(ICell cell, Action onComplete)
-        {
-            cell.SetFlipped();
             var neighbors = GetNeighbors(cell);
             while (neighbors.Count != 0)
             {
@@ -100,8 +105,7 @@ namespace Assets.Scripts.Presenter
                 {
                     if (neighbor is CellEmpty cellEmpty && !cellEmpty.IsFlipped)
                     {
-                        Debug.Log($"Flipping: X: {neighbor.X} Y: {neighbor.Y}");
-                        neighbor.SetFlipped();
+                        Flip(cellEmpty);
 
                         if (cellEmpty.TouchingBombs > 0) //remove the slots that are touching a bomb
                             processingNeighbors.Remove(cellEmpty);
@@ -109,15 +113,28 @@ namespace Assets.Scripts.Presenter
                 }
 
                 neighbors = processingNeighbors.SelectMany(n => GetNeighbors(n)).Distinct().ToList();
-                yield return null;
+                await Task.Delay(50);
             }
-
-            onComplete?.Invoke();
 
             List<ICell> GetNeighbors(ICell targetCell) => gridModel.Grid
                 .GetNeighbors(targetCell.X, targetCell.Y)
-                .Where(n => n != null && n is CellEmpty cellEMpty && n != targetCell && !n.IsFlipped && !n.IsMarked)
+                .Where(n => n != null && n is CellEmpty && !n.IsFlipped && !n.IsMarked)
                 .ToList();
+        }
+
+        //here I'm encapsulating the rule of updating UI and Model to avoid duplications
+        private void Mark(ICell cell)
+        {
+            var isMarked = !cell.IsMarked;
+            cell.SetMarked(isMarked);
+            gameView.SetMarked(cell, isMarked);
+        }
+
+        //here I'm encapsulating the rule of updating UI and Model to avoid duplications
+        private void Flip(ICell cell)
+        {
+            cell.SetFlipped();
+            gameView.SetFlipped(cell);
         }
     }
 }

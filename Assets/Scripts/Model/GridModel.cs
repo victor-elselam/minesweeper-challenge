@@ -8,7 +8,7 @@ namespace Assets.Scripts.Model
     {
         public override bool IsPlaceholder => false;
 
-        public GridModel(GridSettings gridSettings, int bombsCount, IntVector2 firstSquare) : base(gridSettings)
+        public GridModel(GridSettings gridSettings, int bombsCount, IntVector2 firstSquare) : base(gridSettings, bombsCount)
         {
             Grid = GenerateGrid(gridSettings.Horizontal, gridSettings.Vertical, bombsCount, firstSquare);
         }
@@ -44,6 +44,7 @@ namespace Assets.Scripts.Model
             var bombPositions = new List<IntVector2>();
             for (var i = 0; i < bombsCount; i++)
             {
+                //we need to ensure that the first square is not a bomb
                 var pos = GeneratePos();
                 while (pos.X == firstSquare.X && pos.Y == firstSquare.Y)
                     pos = GeneratePos();

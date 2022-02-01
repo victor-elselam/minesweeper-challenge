@@ -12,7 +12,7 @@ namespace Assets.Scripts.View
         {
             base.SetModel(cell);
             var touchingBombs = ((CellEmpty)cell).TouchingBombs;
-            touchingBombsCount.text = touchingBombs > 0 ? touchingBombs.ToString() : touchingBombs.ToString();
+            touchingBombsCount.text = touchingBombs > 0 ? touchingBombs.ToString() : string.Empty;
         }
     }
 }

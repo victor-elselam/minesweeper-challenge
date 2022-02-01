@@ -13,30 +13,22 @@ namespace Assets.Scripts.View
         [SerializeField] private SpriteRenderer cover;
         [SerializeField] private SpriteRenderer mark;
 
-        public virtual void Start()
+        public virtual void Awake()
         {
             cover.gameObject.SetActive(true);
             mark.gameObject.SetActive(false);
         }
 
         public void InputToFlip() => OnFlip?.Invoke(Model); //here the view warn the presenter that it has been cliked
-        private void FlipView() => cover.gameObject.SetActive(false); //here the view respond to the model modification
+        public void FlipView() => cover.gameObject.SetActive(false); //here the view respond to the model modification
 
         public void InputToMark() => OnMark?.Invoke(Model); //here the view warn the presenter that it has been cliked
-        private void MarkView(bool isMarked) => mark.gameObject.SetActive(isMarked); //here the view respond to the model modification
+        public void MarkView(bool isMarked) => mark.gameObject.SetActive(isMarked); //here the view respond to the model modification
 
         public virtual void SetModel(ICell cell)
         {
             Model = cell;
             SetPosition(cell.X, cell.Y);
-            Model.OnMark += MarkView;
-            Model.OnFlip += FlipView;
-        }
-
-        public void OnDestroy()
-        {
-            Model.OnMark -= MarkView;
-            Model.OnFlip -= FlipView;
         }
 
         public virtual void SetPosition(int x, int y)

@@ -17,7 +17,7 @@ MonoBehaviour:
     Vertical: 12
   minBombs: 10
   maxBombs: 20
-  gridViewPrefab: {fileID: 3869532562094752628, guid: 4994573f727fc914e9cdf475c2d06511,
+  gameViewPrefab: {fileID: 4019981864073409202, guid: 0b9b14717a0030944beaa44908425fcd,
     type: 3}
   bombPrefab: {fileID: 85257222412904777, guid: 8cc6ef12791f24a4093592d6ad74f9c3,
     type: 3}

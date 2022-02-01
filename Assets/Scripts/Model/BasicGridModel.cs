@@ -3,25 +3,13 @@
     public class BasicGridModel
     {
         public ICell[,] Grid;
+        public int BombsCount { get; private set; }
         public virtual bool IsPlaceholder => true; //return if this is a placeholder grid
-        public int FlippedSlots
-        {
-            get
-            {
-                var count = 0;
-                foreach (var cell in Grid)
-                {
-                    if (cell.IsFlipped)
-                        count++;
-                }
 
-                return count;
-            }
-        }
-
-        public BasicGridModel(GridSettings gridSettings)
+        public BasicGridModel(GridSettings gridSettings, int bombsCount)
         {
             Grid = GenerateGrid(gridSettings.Horizontal, gridSettings.Vertical);
+            BombsCount = bombsCount;
         }
 
         private ICell[,] GenerateGrid(int horizontal, int vertical)

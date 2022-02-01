@@ -11,6 +11,9 @@ namespace Assets.Scripts.View
         void InputToFlip();
         void InputToMark();
 
+        void FlipView();
+        void MarkView(bool isMarked);
+
         void Destroy();
     }
 }
