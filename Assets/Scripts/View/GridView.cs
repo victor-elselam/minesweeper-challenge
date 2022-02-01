@@ -61,6 +61,7 @@ namespace Assets.Scripts
         private void SetupListeners(ICellView cellView)
         {
             //grid is encapsulating all cells events to simplify the Presenter listener
+            //we don't need to unsubscribe this events, because Unity deals with it for us, since they are UnityEvents
             cellView.OnMark.AddListener((cell) => OnMark?.Invoke(cell));
             cellView.OnFlip.AddListener((cell) => OnFlip?.Invoke(cell));
         }

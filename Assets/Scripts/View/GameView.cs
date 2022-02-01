@@ -18,6 +18,13 @@ namespace Assets.Scripts.View
             gridView.OnMark += SendMarked;
             gridView.OnFlip += SendFlipped;
         }
+
+        public void OnDestroy()
+        {
+            gridView.OnMark -= SendMarked;
+            gridView.OnFlip -= SendFlipped;
+        }
+
         public void PopulateGrid(BasicGridModel gridModel, GameSettings gameSettings)
         {
             minesweeperUI.SetupUI(gridModel.BombsCount);

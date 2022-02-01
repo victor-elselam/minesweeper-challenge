@@ -28,6 +28,12 @@ namespace Assets.Scripts.Presenter
             SetupPlaceholderGame();
         }
 
+        ~MinesweeperPresenter()
+        {
+            gameView.OnFlip -= FlipCell;
+            gameView.OnMark -= Mark;
+        }
+
         //this usage of this Task to restart game is not ideal. Probably we would need more layers to deal with the application loop
         public async void GameEnd(bool win)
         {
