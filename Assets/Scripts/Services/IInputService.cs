@@ -3,5 +3,7 @@
     public interface IInputService
     {
         void Update();
+
+        void Enable(bool enabled);
     }
 }

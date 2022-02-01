@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Model;
+using Assets.Scripts.Services;
 using Assets.Scripts.View;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,14 @@ namespace Assets.Scripts.Presenter
         private GameSettings gameSettings;
         private WinConditionHandler winCondition;
         private IGameView gameView;
-        
+        private IInputService inputService;
         private int bombsCount;
-        private bool isFlipping;
 
-        public MinesweeperPresenter(GameSettings gameSettings, IGameView gameView)
+        public MinesweeperPresenter(GameSettings gameSettings, IGameView gameView, IInputService inputService)
         {
             this.gameSettings = gameSettings;
             this.gameView = gameView;
+            this.inputService = inputService;
             winCondition = new WinConditionHandler();
 
             gameView.OnFlip += FlipCell;
@@ -35,7 +36,7 @@ namespace Assets.Scripts.Presenter
         }
 
         //this usage of this Task to restart game is not ideal. Probably we would need more layers to deal with the application loop
-        public async void GameEnd(bool win)
+        public async Task GameEnd(bool win)
         {
             Debug.Log(win ? "Game Win" : "Game Lose");
             gameView.GameEnd(win);
@@ -67,36 +68,37 @@ namespace Assets.Scripts.Presenter
 
         public async void FlipCell(ICell cell)
         {
+            inputService.Enable(false);
+
             //return to don't allow flipping a marked cell
             if (cell.IsMarked)
+            {
+                inputService.Enable(true);
                 return;
+            }
+                
 
             //if this is the placeholder game, setup a valid one and return
             if (gridModel.IsPlaceholder) 
             {
                 SetupGame(new IntVector2(cell.X, cell.Y));
+                inputService.Enable(true);
                 return;
             }
 
             if (winCondition.IsLose(cell))
             {
-                GameEnd(false);
+                await GameEnd(false);
+                inputService.Enable(true);
                 return;
             }
-
-            //I had to lock it, in some very specific situations, multiple async calls were made and gave a Win in the placeholder game
-            if (isFlipping)
-                return;
-
-            isFlipping = true;
-
-            Debug.Log("Openning cells!");
+            
             await OpenCells(cell);
 
-            isFlipping = false;
-
             if (winCondition.IsWin(gridModel))
-                GameEnd(true);
+                await GameEnd(true);
+
+            inputService.Enable(true);
         }
 
         private async Task OpenCells(ICell cell)
@@ -131,6 +133,9 @@ namespace Assets.Scripts.Presenter
         //here I'm encapsulating the rule of updating UI and Model to avoid duplications
         private void Mark(ICell cell)
         {
+            if (cell.IsFlipped)
+                return;
+
             var isMarked = !cell.IsMarked;
             cell.SetMarked(isMarked);
             gameView.SetMarked(cell, isMarked);

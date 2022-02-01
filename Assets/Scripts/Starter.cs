@@ -10,7 +10,7 @@ namespace Assets.Scripts
     public class Starter : MonoBehaviour
     {
         [SerializeField] private GameSettings gameSettings;
-        private InputService inputService;
+        private IInputService inputService;
         private IGameView view;
         private MinesweeperPresenter presenter;
 
@@ -18,7 +18,7 @@ namespace Assets.Scripts
         {
             this.inputService = new InputService();
             this.view = Instantiate(gameSettings.GameViewPrefab);
-            this.presenter = new MinesweeperPresenter(gameSettings, view);
+            this.presenter = new MinesweeperPresenter(gameSettings, view, inputService);
         }
 
         public void Update()

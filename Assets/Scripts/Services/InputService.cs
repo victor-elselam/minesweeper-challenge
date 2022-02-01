@@ -8,9 +8,18 @@ namespace Assets.Scripts.Services
 
         private IClickable _clickedObject;
         private Vector3 _startMousePos;
+        private bool enabled = true;
+
+        public void Enable(bool enabled)
+        {
+            this.enabled = enabled;
+        }
 
         public void Update()
         {
+            if (!enabled)
+                return;
+
             IClickable clickable;
             if (CheckButtonClick(0, out clickable))
             {
