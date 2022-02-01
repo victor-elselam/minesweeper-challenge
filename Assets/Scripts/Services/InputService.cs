@@ -27,12 +27,6 @@ namespace Assets.Scripts.Services
         {
             if (Input.GetMouseButtonDown(buttonId))
             {
-                if (_clickedObject != null)
-                {
-                    clickable = null;
-                    return false;
-                }
-
                 var origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 var hit = Physics2D.Raycast(origin, Vector2.zero, 200);
                 //_position = hit.point;
@@ -45,21 +39,26 @@ namespace Assets.Scripts.Services
                 }
             }
 
-            //double check to null because unity mess up with Missings in interfaces
-            if (_clickedObject == null || _clickedObject.Equals(null))
+            if (Input.GetMouseButtonUp(buttonId))
             {
-                _clickedObject = null;
-            }
-            else if (Input.GetMouseButtonUp(buttonId))
-            {
+                //double check to null because unity mess up with Missings in interfaces
+                if (_clickedObject == null || _clickedObject.Equals(null))
+                {
+                    clickable = null;
+                    _clickedObject = null;
+                    return false;
+                }
+
                 var mouseDelta = Mathf.Abs(Input.mousePosition.magnitude - _startMousePos.magnitude);
                 if (mouseDelta < AllowedMovement)
                 {
                     clickable = _clickedObject;
+                    _clickedObject = null;
                     return true;
                 }
 
                 clickable = _clickedObject;
+                _clickedObject = null;
                 return false;
             }
 

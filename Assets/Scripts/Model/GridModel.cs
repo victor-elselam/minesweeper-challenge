@@ -30,6 +30,7 @@ namespace Assets.Scripts.Model
                     if (grid[i, j] == null)
                     {
                         var cell = new CellEmpty(i, j);
+                        grid[i, j] = cell;
                         cell.TouchingBombs = grid.GetNeighbors(i, j).Where(n => n != null && n is CellBomb).Count();
                     }
                 }

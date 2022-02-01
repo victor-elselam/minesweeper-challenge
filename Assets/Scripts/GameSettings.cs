@@ -20,6 +20,7 @@ namespace Assets.Scripts
 
         [Header("Prefabs")]
         [SerializeField] private GridView gridViewPrefab;
+        public GridView GridViewPrefab => gridViewPrefab;
 
         [SerializeField] private CellBombView bombPrefab;
         public CellBombView BombPrefab => bombPrefab;
@@ -31,7 +32,7 @@ namespace Assets.Scripts
     [Serializable]
     public class GridSettings
     {
-        [Range(3, 10)] public int Horizontal = 6;
-        [Range(3, 10)] public int Vertical = 6;
+        [Range(5, 50)] public int Horizontal = 6;
+        [Range(5, 50)] public int Vertical = 6;
     }
 }

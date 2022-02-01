@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: Game Settings
   m_EditorClassIdentifier: 
   gridSettings:
-    Horizontal: 6
-    Vertical: 6
-  minBombs: 2
-  maxBombs: 10
-  gridViewPrefab: {fileID: 0}
-  bombPrefab: {fileID: 0}
-  emptyPrefab: {fileID: 0}
+    Horizontal: 12
+    Vertical: 12
+  minBombs: 10
+  maxBombs: 20
+  gridViewPrefab: {fileID: 3869532562094752628, guid: 4994573f727fc914e9cdf475c2d06511,
+    type: 3}
+  bombPrefab: {fileID: 85257222412904777, guid: 8cc6ef12791f24a4093592d6ad74f9c3,
+    type: 3}
+  emptyPrefab: {fileID: 5407075848512358429, guid: 2e8bc38c155b99949b344a2fbf018f52,
+    type: 3}

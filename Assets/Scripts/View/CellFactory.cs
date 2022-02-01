@@ -6,12 +6,12 @@ namespace Assets.Scripts
 {
     public class CellFactory
     {
-        public static ICellView GetCell(ICell cellModel, GameSettings gameSettings)
+        public static ICellView GetCell(ICell cellModel, GameSettings gameSettings, Transform parent)
         {
             if (cellModel is CellEmpty _)
-                return Object.Instantiate(gameSettings.EmptyPrefab);
+                return Object.Instantiate(gameSettings.EmptyPrefab, parent);
             else if (cellModel is CellBomb _ )
-                return Object.Instantiate(gameSettings.BombPrefab);
+                return Object.Instantiate(gameSettings.BombPrefab, parent);
             else
                 throw new System.Exception($"No prefab for type: {cellModel.GetType()} found");
         }
